@@ -1,0 +1,29 @@
+node_modules
+dist
+build
+coverage
+.env
+.env.local
+.env.*.local
+*.log
+.DS_Store
+.turbo
+.vite
+*.tsbuildinfo
+
+# Rust / Tauri
+student-agent/src-tauri/target
+student-agent/src-tauri/gen
+student-agent/src-tauri/WixTools
+
+# Prisma
+backend/prisma/*.db
+backend/prisma/*.db-journal
+
+# IDE
+.idea
+.vscode/*
+!.vscode/extensions.json
+
+# OS
+Thumbs.db

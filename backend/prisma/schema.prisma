@@ -1,0 +1,91 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Mentor {
+  id           String         @id @default(uuid()) @db.Uuid
+  email        String         @unique
+  passwordHash String
+  name         String
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  students     Student[]
+  sessions     Session[]
+  settings     MentorSettings?
+}
+
+model Student {
+  id        String    @id @default(uuid()) @db.Uuid
+  mentorId  String    @db.Uuid
+  mentor    Mentor    @relation(fields: [mentorId], references: [id], onDelete: Cascade)
+  name      String
+  email     String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  sessions  Session[]
+
+  @@index([mentorId])
+}
+
+model MentorSettings {
+  id                             String  @id @default(uuid()) @db.Uuid
+  mentorId                       String  @unique @db.Uuid
+  mentor                         Mentor  @relation(fields: [mentorId], references: [id], onDelete: Cascade)
+  defaultAllowedApps             String[]
+  defaultBlockedApps             String[]
+  defaultAllowedDomains          String[]
+  defaultBlockedDomains          String[]
+  defaultDurationMinutes         Int     @default(60)
+  enableSessionSummaryByDefault  Boolean @default(false)
+  summaryRetentionHours          Int     @default(24)
+}
+
+model Session {
+  id               String          @id @default(uuid()) @db.Uuid
+  mentorId         String          @db.Uuid
+  mentor           Mentor          @relation(fields: [mentorId], references: [id], onDelete: Cascade)
+  studentId        String          @db.Uuid
+  student          Student         @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  pairingCodeHash  String?
+  pairingCodePlain String?
+  pairingUsedAt    DateTime?
+  status           SessionStatus   @default(pending)
+  expiresAt        DateTime
+  createdAt        DateTime        @default(now())
+  endedAt          DateTime?
+  /// JSON SessionConfig — never stores titles, URLs, or keystrokes
+  configJson       Json
+  summary          SessionSummary?
+
+  @@index([mentorId])
+  @@index([studentId])
+  @@index([pairingCodeHash])
+  @@index([status])
+}
+
+model SessionSummary {
+  id             String   @id @default(uuid()) @db.Uuid
+  sessionId      String   @unique @db.Uuid
+  session        Session  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  onTaskSeconds  Int      @default(0)
+  awaySeconds    Int      @default(0)
+  blockedSeconds Int      @default(0)
+  /// Aggregate only: [{ "appName": "VS Code", "seconds": 2520 }]
+  appDurationsJson Json   @default("[]")
+  retainUntil    DateTime
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([retainUntil])
+}
+
+enum SessionStatus {
+  pending
+  active
+  ended
+}

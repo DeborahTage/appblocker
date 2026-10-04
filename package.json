@@ -1,0 +1,26 @@
+{
+  "name": "focusmentor",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Privacy-first live coding lesson focus monitoring system",
+  "packageManager": "pnpm@9.15.0",
+  "scripts": {
+    "build": "pnpm -r --filter @focusmentor/contracts build && pnpm -r --filter @focusmentor/backend --filter @focusmentor/dashboard build",
+    "dev:backend": "pnpm --filter @focusmentor/backend dev",
+    "dev:dashboard": "pnpm --filter @focusmentor/dashboard dev",
+    "dev:agent": "pnpm --filter @focusmentor/student-agent dev",
+    "lint": "pnpm -r lint",
+    "typecheck": "pnpm -r typecheck",
+    "test": "pnpm -r test",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.17.0",
+    "eslint": "^9.17.0",
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.2",
+    "typescript-eslint": "^8.18.1"
+  }
+}

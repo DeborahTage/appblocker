@@ -1,0 +1,37 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: focusmentor
+      POSTGRES_PASSWORD: focusmentor
+      POSTGRES_DB: focusmentor
+    ports:
+      - '5434:5432'
+    volumes:
+      - fm_pg:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U focusmentor -d focusmentor']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    environment:
+      NODE_ENV: production
+      PORT: 4000
+      DATABASE_URL: postgresql://focusmentor:focusmentor@postgres:5432/focusmentor?schema=public
+      JWT_SECRET: local-dev-secret-change-me-32chars-min
+      CORS_ORIGINS: http://localhost:5173,http://localhost:1420
+      COOKIE_SECURE: 'false'
+      COOKIE_SAME_SITE: lax
+    ports:
+      - '4000:4000'
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  fm_pg:
